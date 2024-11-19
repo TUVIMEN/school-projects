@@ -1,0 +1,68 @@
+#!/bin/bash
+# by Dominik Stanisław Suchora <suchora.dominik7@gmail.com>
+# License: GNU GPLv3
+
+#https://gratka.pl/motoryzacja/osobowe
+#https://gratka.pl/motoryzacja/volkswagen-golf-v-v-2-0-fsi-sportline/ob/26563357
+
+IFS=$'\n'
+declare t maxprocs=16
+
+ucurl() {
+    curl -k -L -g -m 120 -s -b "$_cookies" --user-agent 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.15.2 Chrome/87.0.4280.144 Safari/537.36' -H 'Accept-Encoding: gzip, deflate' --compressed "$@"
+}
+
+get_page() {
+    id="${1##*/}"
+    [ -e "oferty/$id.html" ] && return
+    echo "$1" >&2
+    {
+    t="$(ucurl "$1")"
+    echo '<!DOCTYPE html><html><head><title>Oferta</title><link rel='stylesheet' type='text/css' href='../style.css'><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body><a href="../index.html"><div class="bar">Komis</div></a><div class="block">'
+    hgrep 'div +class="sticker__info"' <<< "$t"
+    echo '</div><div class="block">'
+    sed -n '/^ *dataJson: \[{"name":"Galeria",/{s/^ *dataJson: //;s/,$//;p;q}' <<< "$t" | jq -r '.[].data[].url' | sed 's#^#<div class="gallery"><img src="#; :x;$!{N;s#\n#"  onclick="window.open(this.src)"><img src="#;bx}; s#$#" onclick="window.open(this.src)"></div>#'
+    echo '</div><div class="block">'
+    hgrep 'div +id="receipt-[0-9]*"' <<< "$t" | sed '/<a .* class="parameters__locationLink"/{s/<a [^>]*>/<span>/g;s/<\/a>/<\/span>/g}'
+    echo '</div><div class="block">'
+    hgrep 'div +id="description-[0-9]*"' <<< "$t" | sed '/<a .*/d'
+    echo '</div><div class="block">'
+    hgrep 'div +id="rightColumn"; div +data-cy="offerOwnerDetails"' <<< "$t" | sed '/<span class="phoneSmallButton "/{s#^.* data-full-phone-number="#<span>#;s#".*#</span>#}; /<button class="/{:x;N;s/\n/\t/;/<\/button>/!bx;D}; /<a href=/d; /<\/a>/d'
+    echo '</div><div class="block"><div class="footer">Stronę wykonał Dominik Suchora</div></div></body></html>'
+    } > "oferty/$id.html"
+}
+
+next='https://gratka.pl/motoryzacja/osobowe'
+while :
+do
+    echo "$next" >&2
+    t="$(ucurl "$next" | tr -d '\n\r\t\a')"
+
+    for i in $(hgrep 'div +class="listing__teaserWrapper"' <<< "$t")
+    do
+        {
+        echo "$(hgrep 'span +data-cy="teaserLocation" @p"%i\n"' <<< "$i" | sed 's/ //g')" #location
+        echo "$(hgrep 'h2 +class="teaserUnified__title " @p"%i\n"' <<< "$i" | sed 's/^ *//; s/ *$//')" #title
+        link="$(hgrep 'article +data-href @p"%(data-href)a\n"' <<< "$i")"
+        [ "$(jobs | wc -l)" -gt "$maxprocs" ] && wait %%
+        get_page "$link" &
+        echo "${link##*/}" #id
+        echo "$(hgrep 'div +data-cy="teaserPhoto"; source +srcset=".*_large_.*" @p"%(srcset)a\n"' <<< "$i")" #photo
+        echo "$(hgrep 'p +data-cy="teaserPrice" @p"%i\n"' <<< "$i" | sed 's/<.*//; s/ //g')" #price
+        echo "$(hgrep 'ul +class="teaserUnified__paramsWithKey"; li +class="teaserUnified__listItem" @p"%i\t"' <<< "$i")" #fields
+        } | paste -sd ''
+    done | jq -RnMcs '
+        inputs | split("\n") | map(split("") | {
+            ("location"):.[0],
+            ("title"):.[1],
+            ("id"):.[2],
+            ("photo"):.[3],
+            ("price"):.[4],
+            ("fields"):.[5]
+        })[:-1][]'
+
+
+    next="$(hgrep 'a +class="pagination__nextPage" @p"%(href)a\n"' <<< "$t")"
+    [ -z "$next" ] && break
+done > oferty.json
+#sed -i '/^{"location":null,"title":null,"id":null,"photo":null,"price":null,"stan_techniczny":null,"przebieg":null,"rodzaj_ogloszenia":null,"do_negocjacji":null,"typ_nadwozia":null,"stan_pojazdu":null}$/d; 1s/^/[/; $!s/$/,/; $s/$/]/' oferty.json
