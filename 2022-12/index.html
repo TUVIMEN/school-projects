@@ -1,0 +1,152 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>Hotel Marzanna</title>
+        <meta charset="urf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description"  content="jakiś hotel">
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <link rel="icon" href="img/favicon.ico">
+    </head>
+    <body>
+        <nav>
+            <div id="bar">
+                <a class="bar-link" href="kontakt.html">kontakt</a>
+                <img id="logo" src="img/logo.png">
+                <a class="bar-link" href="galeria.html">galeria</a>
+            </div>
+            <h1>Hotel Marzanna</h1>
+        </nav>
+        <main>
+            <div id="rezerwacja" class="uuu">
+	            <h2>Rezerwacja</h2>
+                <form id="frezerwacja">
+                    <label for="ildni">Ilość dni</label>
+                    <input type="number" min="1" value="1" id="ildni"/>
+                    <br>
+                    <label for="ilosob">Ilość osób</label>
+                    <input type="number" min="1" value="1" max="8" id="ilosob"/>
+                    <br>
+                    <label for="ildzieci">Ilość dzieci</label>
+                    <input type="number" min="0" value="0" id="ildzieci"/>
+                    <br>
+                    <label for="pokoj">Rodzaj pokoju</label>
+                    <select id="pokoj">
+                        <option selected>Pokój 1-osobowy</option>
+                        <option>Pokój 2-osobowy</option>
+                        <option>Pokój 3-osobowy</option>
+                        <option>Pokój 4-osobowy</option>
+                        <option>Pokój 5-osobowy</option>
+                        <option>Apartament</option>
+                    </select>
+                    <br>
+                    <label for="zesniadaniem">Śniadanie</label>
+                    <input type="checkbox" id="zesniadaniem"/>
+                </form>
+                <p id="wynik" style="margin-bottom: 0;">Koszt: 100zł</p>
+            </div>
+            <script>
+                function licz() {
+                    var wynik = document.getElementById("wynik");
+                    var ildni = document.getElementById("ildni");
+                    var ilosob = document.getElementById("ilosob");
+                    var ildzieci = document.getElementById("ildzieci");
+                    var pokoj = document.getElementById("pokoj");
+                    var zesniadaniem = document.getElementById("zesniadaniem");
+                    var cena = (zesniadaniem.checked) ? 50 : 0;
+                    var maxosob = 0;
+                    if (Number(ildni.value) < 1 || Number(ilosob) < 1 || Number(ildzieci) < 0) {
+                        wynik.innerHTML = "Wprowadzono złą wartość!";
+                        return;
+                    }
+
+                    switch (pokoj.value) {
+                        case "Pokój 1-osobowy":
+                          cena += 100;
+                          maxosob = 1;
+                          break;
+                        case "Pokój 2-osobowy":
+                          cena += 200;
+                          maxosob = 2;
+                          break;
+                        case "Pokój 3-osobowy":
+                          cena += 325;
+                          maxosob = 3;
+                          break;
+                        case "Pokój 4-osobowy":
+                          cena += 430;
+                          maxosob = 4;
+                          break;
+                        case "Pokój 5-osobowy":
+                          cena += 525;
+                          maxosob = 5;
+                          break;
+                        case "Apartament":
+                          cena += 650;
+                          maxosob = 8;
+                          break;
+                    }
+
+                    if (Number(ilosob.value) > maxosob || Number(ilosob.value) > maxosob+Number(ildzieci.value)+5) {
+                        wynik.innerHTML = "Zbyt duża ilość osób na ten pokój!";
+                        return;
+                    }
+
+                    cena *= Number(ildni.value);
+                    if (Number(ildzieci.value) > 0)
+                        cena -= 50;
+
+                    wynik.innerHTML = "Koszt: " + cena + " zł";
+                }
+
+                document.getElementById("frezerwacja").onchange = licz;
+                licz();
+            </script>
+            <div id="oferta" class="uuu">
+	            <h2>Oferta</h2>
+	            <table class="tafe-table" style="margin: auto;">
+					<thead class="tafe-table-header">
+						<tr>
+							<th></th>
+	                        <th>ze śniadaniem</th>
+	                        <th>bez śniadania</th>
+	                    </tr>
+					</thead>
+					<tbody class="tafe-table-body">
+	                    <tr>
+	                        <td>Pokój 1-osobowy</td>
+	                        <td>150</td>
+	                        <td>100</td>
+	                    </tr>
+	                    <tr>
+	                        <td>Pokój 2-osobowy</td>
+	                        <td>250</td>
+	                        <td>200</td>
+	                    </tr>
+	                    <tr>
+	                        <td>Pokój 3-osobowy</td>
+	                        <td>375</td>
+	                        <td>325</td>
+	                    </tr>
+	                    <tr>
+	                        <td>Pokój 4-osobowy</td>
+	                        <td>480</td>
+	                        <td>430</td>
+	                    </tr>
+	                    <tr>
+	                        <td>Pokój 5-osobowy</td>
+	                        <td>575</td>
+	                        <td>525</td>
+	                    </tr>
+	                    <tr>
+	                        <td>Apartament</td>
+	                        <td>700</td>
+	                        <td>650</td>
+	                    </tr>
+				    </tbody>
+			    </table>
+                <p>Dla osób posiadających dzieci<br>poniżej 10 lat zniszka 50zł</p>
+            </div>
+        </main>
+    </body>
+</html>
