@@ -1,0 +1,192 @@
+:root {
+    --genwidth: 850px;
+    --navwidth: 175px;
+    --fg: #ddd;
+    --altfg: #ccc;
+    --fgemph: white;
+    --bg: #111;
+    --altbg: #222;
+    --emph: #333;
+    --bordercolor: #555;
+    --limish: #0e0;
+    --bg: rgba(0,0,0,0.4);
+    --altbg: rgba(0,0,0,0.4);
+}
+
+body {
+    font-style: sans-serif;
+    background: linear-gradient(darkslategray,darkorange) fixed;
+    margin-bottom: 100px;
+}
+
+main, nav, footer {
+    box-shadow: 5px 5px 5px 5px rgba(0,0,0,0.3) ;
+}
+
+main {
+    margin: auto;
+    color: var(--fg);
+    background: var(--bg);
+    border: dashed 1px var(--bordercolor);
+    padding: 1em;
+    border-radius: 20px;
+}
+
+.img-container {
+    text-align: center;
+}
+
+.p1 {
+    width: 240px;
+    height: 120px;
+    object-fit: cover;
+    display: inline-block;
+}
+
+.p2 {
+    width: 200px;
+    height: 240px;
+    object-fit: cover;
+    display: inline-block;
+}
+
+.p3 {
+    width: 480px;
+    height: 240px;
+    object-fit: cover;
+    display: inline-block;
+}
+
+.p4 {
+    width: 280px;
+    height: 240px;
+    object-fit: scale-down;
+    display: inline-block;
+}
+
+.a1 {
+    display: inline-block;
+    background: var(--bg);
+    border: dashed 1px var(--bordercolor);
+    border-radius: 20px;
+    margin: 0.1em;
+    padding: 0.3em;
+}
+
+.a2 {
+    display: inline-block;
+    border-left: solid 2px var(--bordercolor);
+    border-right: solid 1px var(--bordercolor);
+    border-top: dotted 1px var(--bordercolor);
+    border-bottom: dotted 1px var(--bordercolor);
+    margin: 0.1em;
+    padding: 0.3em;
+    width: 263px;
+    font-size: 13px;
+}
+
+h1 {
+    font-size: xxx-large;
+}
+h2 {
+    font-size: xxx-medium;
+}
+h3 {
+    font-size: xxx-low;
+}
+
+h1,h2,h3,h4,h5 {
+	font-family: "EB Garamond", Garamond, Serif ;
+	text-align: center ;
+	text-shadow: 1px 1px var(--emph) ;
+	font-weight: normal ;
+}
+
+sup {
+    vertical-align: top;
+    font-size: 0.6em;
+}
+
+footer {
+    text-align: center;
+    font-variant: small-caps;
+    clear: both;
+    background: var(--altbg);
+    border-radius: 20px;
+    margin: auto;
+    border: dashed 1px var(--bordercolor);
+    max-width: var(--genwidth);
+}
+
+hr {
+    color: dimgray;
+}
+
+footer {
+    color: var(--altfg);
+    margin-top: 1em;
+}
+
+nav {
+    text-align: center;
+}
+
+h1 {
+    color: teal;
+}
+
+h2 {
+    color: goldenrod;
+}
+
+h3 {
+    color: deepskyblue;
+}
+
+h4 {
+    color: tomato;
+}
+
+h5 {
+    color: black;
+}
+
+a {
+    color: turquoise; text-decoration: none;
+}
+
+a:hover {
+    color: greenyellow
+}
+
+p {
+    text-align: justify;
+}
+
+
+@media (min-width: 55em) {
+
+	.resright, .disappear {
+		display: block ;
+		float: right;
+		padding: 20px ;
+		clear: both ;
+		max-height: 300px ;
+		max-width: 300px ;
+	}
+
+	.resmid {
+		max-height: 300px ;
+		max-width: 300px ;
+	}
+
+	main {
+		max-width: var(--genwidth) ;
+	}
+
+	.column {
+		float: left;
+		width: 50% ;
+	}
+
+}
