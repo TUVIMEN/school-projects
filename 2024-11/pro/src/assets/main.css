@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    background-color: #1a1a1a;
+    color: white;
+}
+
+.navbar-block {
+    padding: 10px;
+}
+
+.navbar-block:hover {
+    border: 2px dashed red;
+}
+
+.button-tabs {
+    width: 20em;
+}
+
+.reglog input {
+    background-color: #444;
+    color: white;
+}
+
+.reglog input, button {
+    margin-top: 1em;
+}
+
+.button-tab {
+    margin-top: 1em;
+    float:left;
+    width: 50%;
+    color: #ccc;
+    border-bottom: 2px solid;
+    border-color: #777;
+    min-height: 2.5em;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.button-tab:hover {
+    color: rgb(239 68 68);
+}
+
+.button-tab[highlighted="true"] {
+    border-color: rgb(150 13 13);
+}
+
+.reglog button {
+    font-size: 1.2em;
+    background-color: rgb(150 13 13);
+    padding: 0.2em;
+}
+
+.reglog button:hover {
+    background-color: blue;
+}

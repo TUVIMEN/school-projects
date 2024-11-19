@@ -1,0 +1,84 @@
+#!/bin/bash
+# by Dominik Stanisław Suchora <suchora.dominik7@gmail.com>
+# License: GNU GPLv3
+
+declare maxprocs=16
+
+IFS=$'\n'
+
+ucurl() {
+    curl -k -L -g -m 120 -s -b "$_cookies" -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.15.2 Chrome/87.0.4280.144 Safari/537.36" -H "Accept-Encoding: gzip, deflate" --compressed "$@"
+}
+
+get_offer() {
+    name="$(echo "$1" | sed 's/.*-//;s/\..*//')"
+    [ -s "$name" ] && return
+    echo "$name"
+    ucurl "$1" | reliq 'script #__NEXT_DATA__ | "%i"'  | jq -rMc --arg url "$1" '{"url":$url}+.' > "$name"
+}
+
+get_page() {
+    for j in $(ucurl "$1" | jq -rMc '.data.advertSearch.edges[].node.url')
+    do
+        [ "$(jobs | wc -l)" -gt "$maxprocs" ] && wait %%
+        get_offer "$j" &
+    done
+    wait
+}
+
+get_pages() {
+    mkdir "$1"
+    cd "$1" || return
+    num="$2"
+    for ((i=1; i <= num; i++))
+    do
+	    echo "$i"
+        get_page "$3$i$4"
+    done
+    cd '..'
+}
+
+[ "$1" = '1' ] && get_pages ciezarowe 436 'https://www.otomoto.pl/graphql?operationName=listingScreen&variables={"click2BuyExperimentId":"","click2BuyExperimentVariant":"","experiments":[{"key":"MCTA-1463","variant":"a"}],"filters":[{"name":"category_id","value":"57"}],"includeCepik":false,"includeClick2Buy":false,"includeFiltersCounters":false,"includeNewPromotedAds":false,"includePriceEvaluation":false,"includePromotedAds":false,"includeRatings":false,"includeSortOptions":false,"includeSuggestedFilters":false,"maxAge":60,"page":' ',"parameters":["make","offer_type","fuel_type","mileage","engine_capacity","engine_code","engine_power","first_registration_year","model","version","year"],"promotedInput":{},"searchTerms":[]}&extensions={"persistedQuery":{"sha256Hash":"2f70d16e54e9735832ff29804d407e123b7c9e3a2b4d37a1909342e21f87d4ae","version":1}}'
+
+[ "$1" = '2' ] && get_pages motocykle 739 'https://www.otomoto.pl/graphql?operationName=listingScreen&variables={"click2BuyExperimentId":"","click2BuyExperimentVariant":"","experiments":[{"key":"MCTA-1463","variant":"a"}],"filters":[{"name":"category_id","value":"65"}],"includeCepik":false,"includeClick2Buy":false,"includeFiltersCounters":false,"includeNewPromotedAds":false,"includePriceEvaluation":false,"includePromotedAds":false,"includeRatings":false,"includeSortOptions":false,"includeSuggestedFilters":false,"maxAge":60,"page":' ',"parameters":["make","offer_type","mileage","fuel_type","engine_capacity","engine_code","engine_power","first_registration_year","model","version","year"],"promotedInput":{},"searchTerms":[]}&extensions={"persistedQuery":{"sha256Hash":"2f70d16e54e9735832ff29804d407e123b7c9e3a2b4d37a1909342e21f87d4ae","version":1}}'
+
+[ "$1" = '3' ] && get_pages osobowe 8477 'https://www.otomoto.pl/graphql?operationName=listingScreen&variables={"click2BuyExperimentId":"","click2BuyExperimentVariant":"","experiments":[{"key":"MCTA-1463","variant":"a"},{"key":"MCTA-1660","variant":"a"},{"key":"MCTA-1661","variant":"a"}],"filters":[{"name":"category_id","value":"29"}],"includeCepik":true,"includeClick2Buy":false,"includeFiltersCounters":false,"includeNewPromotedAds":false,"includePriceEvaluation":true,"includePromotedAds":false,"includeRatings":false,"includeSortOptions":false,"includeSuggestedFilters":false,"maxAge":60,"page":' ',"parameters":["make","offer_type","fuel_type","gearbox","country_origin","mileage","engine_capacity","engine_code","engine_power","first_registration_year","model","version","year","show_pir"],"promotedInput":{},"searchTerms":[]}&extensions={"persistedQuery":{"sha256Hash":"2f70d16e54e9735832ff29804d407e123b7c9e3a2b4d37a1909342e21f87d4ae","version":1}}'
+
+[ "$1" = '4' ] && get_pages czesci 114168 'https://www.otomoto.pl/graphql?operationName=listingScreen&variables={"click2BuyExperimentId":"","click2BuyExperimentVariant":"","experiments":[{"key":"MCTA-1463","variant":"a"}],"filters":[{"name":"category_id","value":"161"}],"includeCepik":false,"includeClick2Buy":false,"includeFiltersCounters":false,"includeNewPromotedAds":false,"includePriceEvaluation":false,"includePromotedAds":false,"includeRatings":false,"includeSortOptions":false,"includeSuggestedFilters":false,"maxAge":60,"page":' ',"parameters":["make","offer_type","parts-type"],"promotedInput":{},"searchTerms":[]}&extensions={"persistedQuery":{"sha256Hash":"2f70d16e54e9735832ff29804d407e123b7c9e3a2b4d37a1909342e21f87d4ae","version":1}}'
+
+#.props.pageProps.advert
+
+#.props.pageProps.advert.status
+#find -mindepth 2 -type f | xargs -n 999 jq -rMc .props.pageProps.advert.status | sort -u > statuses.json
+
+#.props.pageProps.advert.details[]
+
+#.props.pageProps.advert.equipment[]
+
+#.props.pageProps.advert.parametersDict[]
+
+#.props.pageProps.advert.category
+
+#.props.pageProps.advert.seller //not unique
+
+#.props.pageProps.advert.price //not unique
+
+#.props.pageProps.advert.mainFeatures[]
+
+#.props.pageProps.advert.seller.location
+
+#.props.pageProps.advert.seller.featuresBadges[]
+
+#.props.pageProps.advert.seller.logos[]
+
+#.props.pageProps.advert.seller.services[]
+
+#.props.pageProps.advert.seller.featuresBadges[]
+
+#.props.pageProps.advert.seller.workingHours[]
+
+#.props.pageProps.benefits[]
+
+#.props.pageProps.breadcrumbs[]
+
+#.props.pageProps.pageTitle

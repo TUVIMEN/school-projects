@@ -1,0 +1,88 @@
+#!/bin/bash
+# by Dominik Stanisław Suchora <suchora.dominik7@gmail.com>
+# License: GNU GPLv3
+
+echo << END
+create database moto;
+create user cubes identified by 'Calcium';
+grant all on moto.* to cubes;
+use moto;
+
+create table badge_names(id int primary key auto_increment, code varchar(32), name varchar(255));
+create table badges(id int primary key auto_increment, nameid int, sellerid int);
+
+create table logos(id int primary key auto_increment, src varchar(512), alt varchar(255), type varchar(32), sellerid int);
+
+create table parameter_names(id int primary key auto_increment, name varchar(128));
+create table parameters(id int primary key auto_increment, nameid int, offerid int, value varchar(255));
+
+create table service_names(id int primary key auto_increment, name varchar(32), src varchar(512));
+create table services(id int primary key auto_increment, serviceid int, sellerid int);
+
+create table workinghours(id int primary key auto_increment, sellerid int, day tinyint, openhour tinyint, openminute tinyint, closehour tinyint, closeminute tinyint);
+
+create table detail_names(id int primary key auto_increment, `key` varchar(64), name varchar(64));
+create table details(id int primary key auto_increment, detailid int, offerid int, value varchar(255));
+
+create table categories(id int primary key auto_increment, name varchar(32), code varchar(32));
+
+create table locations(id int primary key auto_increment, address varchar(255), city varchar(128), region varchar(64), country varchar(32), postalcode varchar(12), shortaddress varchar(255), c_city varchar(64), c_region varchar(64), c_subregion varchar(64), latitude float, longitude float, zoom smallint, radius smallint);
+
+create table equipment_categories(id int primary key auto_increment, `key` varchar(128), name varchar(128));
+create table equipment_names(id int primary key auto_increment, `key` varchar(128), name varchar(128), categoryid int);
+
+create table equipments(id int primary key auto_increment, nameid int, offerid int);
+
+create table sellers(id int primary key auto_increment, locationid int, website varchar(512), name varchar(255), phonenumber varchar(128), isprivate tinyint, userid int, created datetime);
+
+create table offer_photos(id int primary key auto_increment, src varchar(512), offerid int);
+
+create table currencies(id int primary key auto_increment, name char(3), value float);
+create table offers (id int primary key auto_increment, title varchar(255), price decimal(12,2), currencyid int, sellerid int, created datetime, description text, categoryid int, isactive tinyint);
+
+create table members (id int primary key auto_increment, avatar varchar(255), created datetime, lastseen datetime, email varchar(255), phash varchar(32), psalt varchar(32), perm tinyint, name varchar(64));
+create table messages (id int primary key auto_increment, senderid int, recipientid int, offerid int, created datetime, value text);
+
+create table comments (id int primary key auto_increment, sellerid int, userid int, created datetime, value text);
+
+create index n on badges(nameid,sellerid);
+create index n on parameters(nameid,offerid);
+create index n on services(serviceid,sellerid);
+create index n on details(detailid,offerid);
+create index n on equipments(nameid,offerid);
+create index n on messages(senderid,recipientid);
+create index offerid on messages(offerid);
+create index sellerid on logos(sellerid);
+create index sellerid on workinghours(sellerid);
+create index names_categoryid on equipment_names(categoryid);
+create index locationid on sellers(locationid);
+create index userid on sellers(userid);
+create index photos_offerid on offer_photos(offerid);
+create index photos_src on offer_photos(src);
+create index currencyid on offers(currencyid);
+create index sellerid on offers(sellerid);
+create index categoryid on offers(categoryid);
+create index sellerid on comments(sellerid);
+create index userid on comments(userid);
+
+END
+
+#select count(*) from (select count(*) as count from offers o join details d on d.offerid=o.id where d.detailid in (2,3) group by d.offerid) s where s.count=2;
+#select count(*) from (select count(*) as count from offers o join details d on d.offerid=o.id where (d.detailid = 2 and d.value = "BMW") or d.detailid = 3 group by d.offerid) s where s.count=2;
+#select count(*) from offers o join details d on d.offerid=o.id and d.detailid = 2 join details d2 on d2.offerid=o.id and d2.detailid=3;
+#select d2.id,d2.detailid,d.value,d2.value from offers o join details d on d.offerid=o.id and d.detailid = 2 join details d2 on d2.offerid=o.id and d2.detailid=3 group by d2.value limit 20;
+#select count(*),d.value from offers o join details d on d.offerid=o.id and d.detailid = 2 group by d.value order by count(*);
+#make - Marka 2 , model - Model 3 , generation - Generacja 48
+
+ucurl 'https://cdn.jsdelivr.net/gh/prebid/currency-file@1/latest.json' | jq -rMc '.conversions.USD | ( .PLN as $pln | to_entries | map(. | "insert into currencies values (null,\"\(.key)\",\($pln/.value));")[] )' > currencies.sql
+echo 'source ./currencies.sql' | mariadb -u cubes -pCalcium moto
+rm currencies.sql
+
+mkdir .avatars .offer_photos .logos
+
+#x = mysql.connector.connect(user='cubes',database="pasieka",password='Calcium',host="localhost",collation="utf8mb4_unicode_ci")
+#c = x.cursor()
+#c.execute('show tables;')
+#c.fetchall()
+
+#select distinct value from details where detailid=(select id from detail_names where `key`="make");

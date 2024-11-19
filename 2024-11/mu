@@ -1,0 +1,10 @@
+time ucurl -X POST --data-raw '{"email":"loop@loop.com","name":"loop","password":"loop"}' 'http://127.0.0.1/api/register'
+time ucurl -v -X POST --data-raw '{"email":"loop@loop.com","password":"loop"}' 'http://127.0.0.1/api/login' #very stupid warning
+
+time ucurl -b 'auth=s28j4bei67uqc7jnnq78bsn96d' -X POST 'http://127.0.0.1/api/sellers'
+time ucurl -b 'auth=s28j4bei67uqc7jnnq78bsn96d'  'http://127.0.0.1/api/offer/3'
+
+time ucurl -X POST -b 'auth=s28j4bei67uqc7jnnq78bsn96d' --data-raw '{"page":1,"sellerid":5}' 'http://127.0.0.1/api/seller'
+time ucurl -X POST -b 'auth=s28j4bei67uqc7jnnq78bsn96d' --data-raw '{"page":1,"query":"a","sellerid":"1"}' 'http://127.0.0.1/api/seller'
+time ucurl -X POST -b 'auth=s28j4bei67uqc7jnnq78bsn96d' --data-raw '{"page":1,"query":"a"}' 'http://127.0.0.1/api/search_category'
+time ucurl -X POST -b 'auth=s28j4bei67uqc7jnnq78bsn96d' --data-raw '{"page":1,"query":"a","category_code":"osobowe"}' 'http://127.0.0.1/api/search_category'
