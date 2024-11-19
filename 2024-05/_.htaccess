@@ -1,0 +1,5 @@
+RewriteEngine on
+
+RewriteRule ^/api/(.*)$ /api.php [L]
+RewriteRule ^/([^.]+)$ /index.html [L]
+RewriteRule ^/([^.]+/.*)$ /index.html [L]

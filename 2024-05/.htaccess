@@ -1,0 +1,5 @@
+RewriteEngine on
+
+RewriteRule "api/(.*)" api.php [L]
+RewriteRule "[^.]+" index.html [L]
+ErrorDocument 404 "<H1>Page not found</H1>"

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>vegan forum</title>
+        <link rel="stylesheet" href="/style.css" />
+        <meta rel='shortcut icon' href='/icon.ico' type='image/x-icon' />
+        <script src="/api.js"></script>
+        <script src="/script.js"></script>
+    </head>
+    <body>
+        <div id="thread_reactions_container" style="display: none;"></div>
+        <div id="main_container">
+            <h1 id="main_header" onclick="changesite_path('/')">Vegan Forum</h1>
+            <div id="main_search">
+                <input id="search_text" name="search_text" placeholder="search" type="text">
+                <button type="submit" onclick="ssearch()">Search</button>
+            </div>
+
+            <div id="container_reglog" class="container" style="display: none;">
+                <div class="button_tabs">
+                    <div class="button_tab" id="button-login" onclick="reglog_change(0,true)">Login</div>
+                    <div class="button_tab" id="button-register" onclick="reglog_change(1,true)">Register</div>
+                    <div style="clear:both"></div>
+                </div>
+                <div id="form-login" class="forms">
+                    <input id="email-login" name="email" placeholder="email" type="email">
+                    <br>
+                    <input id="password-login" name="password" placeholder="password" type="password">
+                    </br>
+                    <button type="submit" onclick="checklogin()">Login</button>
+                </div>
+                <div id="form-register" class="forms">
+                    <input id="username-register" name="username" placeholder="username" type="text">
+                    <br>
+                    <input id="email-register" name="email" placeholder="email" type="email">
+                    <br>
+                    <input id="password-register" name="password" placeholder="password" type="password">
+                    </br>
+                    <input id="repassword-register" name="repassword" placeholder="repassword" type="password">
+                    </br>
+                    <button type="submit" onclick="checkregister()">Register</button>
+                </div>
+                <div id="reglog_error"></div>
+            </div>
+
+            <div id="container_forumtree" class="container" style="display: none">
+                <div id="forumtree_list"></div>
+            </div>
+
+            <div id="container_view" class="container" style="display: none">
+                <p id="view_path"></p>
+                <div id="view_button" onclick="nthread_change()">New thread</div>
+                <div id="view_nthread_form" style="display: none">
+                    <input id="view_nthread_title" name="nthread_title" placeholder="Thread title" type="text">
+                    </br>
+                    <button type="submit" onclick="nthread_send()">Create</button>
+                </div>
+                <div id="view_list"></div>
+                <div id="view_pages"></div>
+            </div>
+
+            <div id="container_thread" class="container" style="display: none">
+                <p id="thread_title"></p>
+                <p id="thread_path"></p>
+                <div id="thread_button" onclick="npost_change()">Post</div>
+                <div id="thread_post_form" style="display: none">
+                    <textarea id="thread_post_text" name="post_text" placeholder="Your message"></textarea>
+                    </br>
+                    <button type="submit" onclick="npost_send()">Send</button>
+                </div>
+                <div id="thread_list"></div>
+                <div id="thread_pages"></div>
+            </div>
+
+            <div id="container_error" class="container" style="display: none">
+                <h2 id="error_title"></p>
+                <div id="error_content"></div>
+            </div>
+        </div>
+
+        <script>
+            window.addEventListener("popstate",changesite);
+            changesite(null);
+            //window.history.replaceState(null,document.title,"ind");
+            //window.history.pushState(null,document.title,"cal");
+        </script>
+        
+    </body>
+</html>

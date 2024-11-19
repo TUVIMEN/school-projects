@@ -1,0 +1,50 @@
+#!/bin/bash
+# by Dominik Stanisław Suchora <suchora.dominik7@gmail.com>
+# License: GNU GPLv3
+
+mkdir veganforum
+xenforo-scraper -p 4 -d veganforum -c 'https://www.veganforum.org/'
+
+find veganforum -type f -name 'm-*' -size -165c -delete
+find veganforum -type f -regextype egrep -regex '.*/[0-9]*' -size -442c -delete
+
+find veganforum -type f -name 'm-*' | xargs -r cat > veganforum-members.json
+find veganforum -type f -regextype egrep -regex '.*/[0-9]*' | xargs -r cat > veganforum-threads.json
+rm -r veganforum
+
+mysql_desync() {
+    awk '{ if (g == 0) print "BEGIN;"; print $0; if (g == 4000) { print "END;"; g=0;}; g++}; END {if (g != 0) print "END;";}'
+}
+
+{
+echo 'create database xen_forum;'
+echo 'use xen_forum;'
+echo 'create table members (id int, location varchar(128), avatar varchar(255), joined datetime, lastseen datetime, title varchar(64), name varchar(128), messages int, reactionscore int, points int, email varchar(255), phash varchar(32), psalt varchar(32));'
+sed -E 's/"[^"]*"://g; s/^\{//; s/\}$//; s/^"([0-9]*)",("[^"]*"),("[^"]*"),"[^"]*",("([^"]{19})[^"]*"|""),("([^"]{19})[^"]*"|""),("[^"]*"),("[^"]*"),"[^"]*"/insert into members values (\1,\2,\3,"\5","\7",\8,\9,\n/; s/\n,"([^"]*)","([^"]*)","([^"]*)"/\1,\2,\3,NULL,NULL,NULL);/; s/,""/,NULL/g' veganforum-members.json | mysql_desync
+echo 'create table reactions (id int,user_id int,user varchar(128),date datetime,reaction varchar(32),post_id int);'
+jq -rs 'foreach (.[].posts | map(.reactions[] += {"post_id":(.id | tonumber)}))[].reactions[] as $item (0; .+1; $item + {"id":.}) | {"id":.id,"user_id":(.user_id | tonumber),"user":.user,"date":(.date[:19]),"reaction":.reaction,"post_id":.post_id}  | to_entries | map(.key) as $k | map(.value) as $v | "insert into reactions (\($k | join(","))) values (\($v | @csv));"' veganforum-threads.json | mysql_desync
+echo 'create table posts (id int,user_id int,user varchar(128),date datetime,text text,thread_id int,reactions int);'
+jq -r '(.posts[] += {"thread_id":(.id | tonumber)}).posts | map({"id":(.id | tonumber),"user_id":(.user_id | tonumber),"user":.user,"date":(.date[:19]),"text":.text,"thread_id":.thread_id,"reactions":(.reactions | length)})[] | to_entries | map(.key) as $k | map(.value) as $v | "insert into posts (\($k | join(","))) values (\($v));"' veganforum-threads.json   | sed 's/\]);$/);/; s/\(insert into posts (id,user_id,user,date,text,thread_id,reactions) values (\)\[/\1/' | mysql_desync
+echo 'create table threads (id int,title varchar(255),user_id int,user varchar(128),date datetime,path varchar(255),tags varchar(255),posts int);'
+jq -r '. | {"id":(.id | tonumber),"title":.title,"user_id":(.user_id | tonumber),"user":.user,"date":(.date[:19]),"path":.path,"tags":(.tags | join(" ")),"posts":(.posts | length)} | to_entries | map(.key) as $k | map(.value) as $v | "insert into threads (\($k | join(","))) values (\($v | @csv));"' veganforum-threads.json | mysql_desync
+echo 'create table paths (id int primary key auto_increment,path varchar(255),count int);'
+jq -r '.path' veganforum-threads.json | sort | uniq -c | sed 's/^ *\([0-9]*\)  *\(.*\)$/insert into paths values (null,"\2",\1);/'
+echo 'create table tags (id int primary key auto_increment,tag varchar(32),count int);'
+jq -r '.tags | map(split(" ")[])[]' veganforum-threads.json  | sort | uniq -c | sed 's/^ *\([0-9]*\)  *\(.*\)$/insert into tags values (null,"\2",\1);/'
+echo 'delete from reactions where id in (select id from reactions group by id having count(id) > 1);'
+echo 'delete from members where id in (select id from members group by id having count(id) > 1);'
+echo 'delete from posts where id in (select id from reactions group by id having count(id) > 1);'
+echo 'delete from threads where id in (select id from reactions group by id having count(id) > 1);'
+echo 'alter table members change id id int primary key auto_increment;'
+echo 'alter table reactions change id id int primary key auto_increment;'
+echo 'alter table posts change id id int primary key auto_increment;'
+echo 'alter table threads change id id int primary key auto_increment;'
+echo 'create user cubes identified by "Calcium";'
+echo 'grant all on xen_forum.* to "cubes"@"localhost" identified by "Calcium";'
+echo 'create index posts_id on posts (thread_id);'
+echo 'create index reactions_id on reactions (post_id);'
+echo 'create index path on threads (path);'
+} > data.sql
+
+#sudo mariadb-dump xen_forum > xen_forum.sql
+#politopiaplayer -C xen_forum < xen_forum.sql
